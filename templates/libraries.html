@@ -1,0 +1,186 @@
+{% extends 'base.html' %}
+
+{% block title %}Libraries - GenAIPulse{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-8">
+        <h1 class="mb-3">AI Libraries</h1>
+        <p class="lead">Explore AI libraries and packages across multiple programming languages.</p>
+    </div>
+    <div class="col-md-4">
+        <div class="search-box mb-3">
+            <i class="fas fa-search"></i>
+            <form action="{{ url_for('main.libraries') }}" method="get">
+                <input type="text" class="form-control" name="q" placeholder="Search libraries..." value="{{ request.args.get('q', '') }}">
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-3">
+        <div class="card mb-4">
+            <div class="card-header bg-primary text-white">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-filter me-2"></i>Filters
+                    <button class="btn btn-sm btn-outline-light float-end" id="filter-toggle">
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                </h5>
+            </div>
+            <div class="card-body" id="filter-panel">
+                <form action="{{ url_for('main.libraries') }}" method="get">
+                    {% if request.args.get('q') %}
+                    <input type="hidden" name="q" value="{{ request.args.get('q') }}">
+                    {% endif %}
+                    
+                    <div class="mb-3">
+                        <label class="form-label"><strong>Language</strong></label>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="language" value="Python" id="lang-python" {% if 'Python' in selected_languages %}checked{% endif %}>
+                            <label class="form-check-label" for="lang-python">Python</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="language" value="JavaScript" id="lang-js" {% if 'JavaScript' in selected_languages %}checked{% endif %}>
+                            <label class="form-check-label" for="lang-js">JavaScript</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="language" value=".NET" id="lang-dotnet" {% if '.NET' in selected_languages %}checked{% endif %}>
+                            <label class="form-check-label" for="lang-dotnet">.NET</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="language" value="Java" id="lang-java" {% if 'Java' in selected_languages %}checked{% endif %}>
+                            <label class="form-check-label" for="lang-java">Java</label>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label"><strong>Category</strong></label>
+                        {% for category in categories %}
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="category" value="{{ category.id }}" id="cat-{{ category.id }}" {% if category.id|string in selected_categories %}checked{% endif %}>
+                            <label class="form-check-label" for="cat-{{ category.id }}">{{ category.name }}</label>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label"><strong>Sort By</strong></label>
+                        <select class="form-select" name="sort">
+                            <option value="popularity" {% if sort == 'popularity' %}selected{% endif %}>Popularity</option>
+                            <option value="newest" {% if sort == 'newest' %}selected{% endif %}>Newest</option>
+                            <option value="name" {% if sort == 'name' %}selected{% endif %}>Name (A-Z)</option>
+                        </select>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary w-100">Apply Filters</button>
+                </form>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-header bg-info text-white">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-chart-bar me-2"></i>Statistics
+                </h5>
+            </div>
+            <div class="card-body">
+                <p><strong>Total Libraries:</strong> {{ total_libraries }}</p>
+                <p><strong>Languages:</strong> {{ languages|length }}</p>
+                <p><strong>Categories:</strong> {{ categories|length }}</p>
+                <p><strong>Last Updated:</strong> {{ last_updated.strftime('%Y-%m-%d %H:%M') if last_updated else 'N/A' }}</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-9">
+        {% if libraries %}
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <p>Showing {{ libraries|length }} of {{ total_libraries }} libraries</p>
+                <div class="btn-group" role="group">
+                    <a href="{{ url_for('main.libraries', view='grid', **request.args) }}" class="btn btn-outline-secondary {% if view == 'grid' %}active{% endif %}">
+                        <i class="fas fa-th-large"></i>
+                    </a>
+                    <a href="{{ url_for('main.libraries', view='list', **request.args) }}" class="btn btn-outline-secondary {% if view == 'list' %}active{% endif %}">
+                        <i class="fas fa-list"></i>
+                    </a>
+                </div>
+            </div>
+            
+            {% if view == 'grid' %}
+                <div class="row">
+                    {% for library in libraries %}
+                        <div class="col-md-4 mb-4">
+                            <div class="card h-100">
+                                <div class="card-header d-flex justify-content-between align-items-center">
+                                    <span class="badge bg-{{ library.language|lower }}">{{ library.language }}</span>
+                                    <small class="text-muted">v{{ library.current_version }}</small>
+                                </div>
+                                <div class="card-body">
+                                    <h5 class="card-title">{{ library.name }}</h5>
+                                    <p class="card-text">{{ library.description|truncate(100) }}</p>
+                                </div>
+                                <div class="card-footer d-flex justify-content-between align-items-center">
+                                    <small class="text-muted">
+                                        <i class="far fa-calendar-alt me-1"></i>
+                                        {{ library.last_update.strftime('%Y-%m-%d') if library.last_update else 'Unknown' }}
+                                    </small>
+                                    <a href="{{ url_for('main.library_detail', library_id=library.id) }}" class="btn btn-sm btn-primary">Details</a>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="list-group">
+                    {% for library in libraries %}
+                        <a href="{{ url_for('main.library_detail', library_id=library.id) }}" class="list-group-item list-group-item-action">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h5 class="mb-1">{{ library.name }}</h5>
+                                <span class="badge bg-{{ library.language|lower }}">{{ library.language }}</span>
+                            </div>
+                            <p class="mb-1">{{ library.description|truncate(150) }}</p>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <small class="text-muted">
+                                    <i class="fas fa-code-branch me-1"></i>v{{ library.current_version }}
+                                    <i class="far fa-calendar-alt ms-2 me-1"></i>{{ library.last_update.strftime('%Y-%m-%d') if library.last_update else 'Unknown' }}
+                                </small>
+                                <div>
+                                    {% for category in library.categories %}
+                                        <span class="badge bg-secondary">{{ category.name }}</span>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </a>
+                    {% endfor %}
+                </div>
+            {% endif %}
+            
+            <div class="mt-4">
+                <nav aria-label="Page navigation">
+                    <ul class="pagination justify-content-center">
+                        <li class="page-item {% if not prev_page %}disabled{% endif %}">
+                            <a class="page-link" href="{{ url_for('main.libraries', page=prev_page, **request.args) if prev_page else '#' }}">Previous</a>
+                        </li>
+                        
+                        {% for p in range(1, total_pages + 1) %}
+                            <li class="page-item {% if p == page %}active{% endif %}">
+                                <a class="page-link" href="{{ url_for('main.libraries', page=p, **request.args) }}">{{ p }}</a>
+                            </li>
+                        {% endfor %}
+                        
+                        <li class="page-item {% if not next_page %}disabled{% endif %}">
+                            <a class="page-link" href="{{ url_for('main.libraries', page=next_page, **request.args) if next_page else '#' }}">Next</a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        {% else %}
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle me-2"></i>No libraries found matching your criteria. Try adjusting your filters.
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %} 

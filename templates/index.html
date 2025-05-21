@@ -1,0 +1,264 @@
+{% extends 'base.html' %}
+
+{% block title %}GenAIPulse - Monitor AI Library Updates{% endblock %}
+
+{% block content %}
+<div class="row mb-5">
+    <div class="col-md-8">
+        <div class="jumbotron bg-light p-5 rounded">
+            <h1 class="display-4">Track GenAI Library Updates</h1>
+            <p class="lead">Stay updated with the latest AI libraries and packages across Python, JavaScript, .NET, and Java.</p>
+            <hr class="my-4">
+            <p>Discover new tools, monitor version updates, and keep up with the fast-evolving GenAI ecosystem.</p>
+            <a class="btn btn-primary btn-lg" href="{{ url_for('main.libraries') }}" role="button">
+                <i class="fas fa-search me-2"></i>Explore Libraries
+            </a>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card shadow-sm">
+            <div class="card-header bg-primary text-white">
+                <h5 class="card-title mb-0"><i class="fas fa-chart-line me-2"></i>Language Stats</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="languageChart" width="100%" height="200"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-success text-white">
+                <h5 class="card-title mb-0"><i class="fas fa-star me-2"></i>Trending Libraries</h5>
+            </div>
+            <div class="card-body">
+                <div class="list-group">
+                    {% if trending_libraries %}
+                        {% for library in trending_libraries %}
+                            <a href="{{ url_for('main.library_detail', library_id=library.id) }}" class="list-group-item list-group-item-action">
+                                <div class="d-flex w-100 justify-content-between">
+                                    <h5 class="mb-1">{{ library.name }}</h5>
+                                    <small class="text-muted">{{ library.language }}</small>
+                                </div>
+                                <p class="mb-1">{{ library.description | truncate(100) }}</p>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <small class="text-muted">
+                                        <i class="fas fa-code-branch me-1"></i>v{{ library.current_version }}
+                                    </small>
+                                    <span class="badge bg-primary rounded-pill">
+                                        <i class="fas fa-star me-1"></i>{{ library.github_stars }}
+                                    </span>
+                                </div>
+                            </a>
+                        {% endfor %}
+                    {% else %}
+                        <div class="text-center py-3">
+                            <p class="text-muted">No trending libraries found.</p>
+                        </div>
+                    {% endif %}
+                </div>
+                <div class="text-center mt-3">
+                    <a href="{{ url_for('main.libraries') }}?sort=popularity" class="btn btn-sm btn-outline-success">
+                        View All Trending Libraries
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-info text-white">
+                <h5 class="card-title mb-0"><i class="fas fa-rocket me-2"></i>Newest Libraries</h5>
+            </div>
+            <div class="card-body">
+                <div class="list-group">
+                    {% if newest_libraries %}
+                        {% for library in newest_libraries %}
+                            <a href="{{ url_for('main.library_detail', library_id=library.id) }}" class="list-group-item list-group-item-action">
+                                <div class="d-flex w-100 justify-content-between">
+                                    <h5 class="mb-1">{{ library.name }}</h5>
+                                    <small class="text-muted">{{ library.language }}</small>
+                                </div>
+                                <p class="mb-1">{{ library.description | truncate(100) }}</p>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <small class="text-muted">
+                                        <i class="far fa-calendar-alt me-1"></i>
+                                        {{ library.last_update.strftime('%Y-%m-%d') if library.last_update else 'Unknown' }}
+                                    </small>
+                                    <span class="badge bg-info rounded-pill">New</span>
+                                </div>
+                            </a>
+                        {% endfor %}
+                    {% else %}
+                        <div class="text-center py-3">
+                            <p class="text-muted">No new libraries found.</p>
+                        </div>
+                    {% endif %}
+                </div>
+                <div class="text-center mt-3">
+                    <a href="{{ url_for('main.libraries') }}?sort=newest" class="btn btn-sm btn-outline-info">
+                        View All New Libraries
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <div class="card shadow-sm">
+            <div class="card-header bg-warning text-dark">
+                <h5 class="card-title mb-0"><i class="fas fa-tags me-2"></i>Explore by Category</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-3 mb-3">
+                        <a href="{{ url_for('main.libraries') }}?category=1" class="text-decoration-none">
+                            <div class="card text-white bg-primary mb-3">
+                                <div class="card-body text-center py-4">
+                                    <i class="fas fa-robot fa-3x mb-3"></i>
+                                    <h5 class="card-title">Artificial Intelligence</h5>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <a href="{{ url_for('main.libraries') }}?category=2" class="text-decoration-none">
+                            <div class="card text-white bg-success mb-3">
+                                <div class="card-body text-center py-4">
+                                    <i class="fas fa-brain fa-3x mb-3"></i>
+                                    <h5 class="card-title">Machine Learning</h5>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <a href="{{ url_for('main.libraries') }}?category=3" class="text-decoration-none">
+                            <div class="card text-white bg-danger mb-3">
+                                <div class="card-body text-center py-4">
+                                    <i class="fas fa-network-wired fa-3x mb-3"></i>
+                                    <h5 class="card-title">Deep Learning</h5>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <a href="{{ url_for('main.libraries') }}?category=4" class="text-decoration-none">
+                            <div class="card text-white bg-info mb-3">
+                                <div class="card-body text-center py-4">
+                                    <i class="fas fa-comment-alt fa-3x mb-3"></i>
+                                    <h5 class="card-title">NLP</h5>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <a href="{{ url_for('main.libraries') }}?category=5" class="text-decoration-none">
+                            <div class="card text-white bg-secondary mb-3">
+                                <div class="card-body text-center py-4">
+                                    <i class="fas fa-eye fa-3x mb-3"></i>
+                                    <h5 class="card-title">Computer Vision</h5>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <a href="{{ url_for('main.libraries') }}?category=6" class="text-decoration-none">
+                            <div class="card text-white bg-dark mb-3">
+                                <div class="card-body text-center py-4">
+                                    <i class="fas fa-microphone fa-3x mb-3"></i>
+                                    <h5 class="card-title">Speech Processing</h5>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <a href="{{ url_for('main.libraries') }}?category=7" class="text-decoration-none">
+                            <div class="card text-dark bg-warning mb-3">
+                                <div class="card-body text-center py-4">
+                                    <i class="fas fa-cogs fa-3x mb-3"></i>
+                                    <h5 class="card-title">Reinforcement Learning</h5>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <a href="{{ url_for('main.libraries') }}?category=8" class="text-decoration-none">
+                            <div class="card text-white bg-primary mb-3">
+                                <div class="card-body text-center py-4">
+                                    <i class="fas fa-lightbulb fa-3x mb-3"></i>
+                                    <h5 class="card-title">Generative AI</h5>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+                <div class="text-center mt-3">
+                    <a href="{{ url_for('main.categories') }}" class="btn btn-outline-warning">
+                        View All Categories
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Language distribution chart
+        var languageCtx = document.getElementById('languageChart').getContext('2d');
+        
+        // Data from backend or placeholder data if empty
+        var languageData = [];
+        
+        {% if languages %}
+            {% for language, count in languages %}
+                languageData.push({ name: "{{ language }}", count: {{ count }} });
+            {% endfor %}
+        {% else %}
+            languageData = [
+                { name: "Python", count: 35 },
+                { name: "JavaScript", count: 25 },
+                { name: ".NET", count: 15 },
+                { name: "Java", count: 25 }
+            ];
+        {% endif %}
+        
+        var labels = languageData.map(function(item) { return item.name; });
+        var data = languageData.map(function(item) { return item.count; });
+        var colors = [
+            'rgba(54, 162, 235, 0.8)',
+            'rgba(255, 206, 86, 0.8)',
+            'rgba(75, 192, 192, 0.8)',
+            'rgba(153, 102, 255, 0.8)',
+            'rgba(255, 99, 132, 0.8)'
+        ];
+        
+        new Chart(languageCtx, {
+            type: 'doughnut',
+            data: {
+                labels: labels,
+                datasets: [{
+                    data: data,
+                    backgroundColor: colors,
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    }
+                }
+            }
+        });
+    });
+</script>
+{% endblock %} 

@@ -1,0 +1,271 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ library.name }} - GenAIPulse{% endblock %}
+
+{% block content %}
+<div class="library-header">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-8">
+                <h1>{{ library.name }}</h1>
+                <p class="lead">{{ library.description }}</p>
+                <div class="d-flex align-items-center mt-3">
+                    <span class="badge bg-{{ library.language|lower }} me-2">{{ library.language }}</span>
+                    <span class="badge bg-info me-2">v{{ library.current_version }}</span>
+                    {% for category in library.categories %}
+                        <span class="badge bg-secondary me-2">{{ category.name }}</span>
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="col-md-4 text-md-end">
+                <div class="btn-group" role="group">
+                    {% if library.package_url %}
+                    <a href="{{ library.package_url }}" class="btn btn-light" target="_blank">
+                        <i class="fas fa-box me-1"></i> Package
+                    </a>
+                    {% endif %}
+                    
+                    {% if library.repository_url %}
+                    <a href="{{ library.repository_url }}" class="btn btn-light" target="_blank">
+                        <i class="fab fa-github me-1"></i> Repository
+                    </a>
+                    {% endif %}
+                    
+                    {% if library.documentation_url %}
+                    <a href="{{ library.documentation_url }}" class="btn btn-light" target="_blank">
+                        <i class="fas fa-book me-1"></i> Docs
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card mb-4">
+            <div class="card-header bg-primary text-white">
+                <h5 class="card-title mb-0"><i class="fas fa-info-circle me-2"></i>Overview</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <p><strong>Name:</strong> {{ library.name }}</p>
+                        <p><strong>Language:</strong> {{ library.language }}</p>
+                        <p><strong>Current Version:</strong> {{ library.current_version }}</p>
+                        <p><strong>Last Updated:</strong> {{ library.last_update.strftime('%Y-%m-%d') if library.last_update else 'Unknown' }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <p><strong>Popularity Score:</strong> {{ "%.2f"|format(library.popularity_score) }}</p>
+                        <p><strong>GitHub Stars:</strong> {{ library.github_stars|default('N/A') }}</p>
+                        <p><strong>Monthly Downloads:</strong> {{ library.monthly_downloads|default('N/A') }}</p>
+                        <p><strong>Categories:</strong> 
+                            {% for category in library.categories %}
+                                <a href="{{ url_for('main.libraries', category=category.id) }}" class="text-decoration-none">
+                                    {{ category.name }}{{ ", " if not loop.last }}
+                                </a>
+                            {% endfor %}
+                        </p>
+                    </div>
+                </div>
+                
+                <hr>
+                
+                <h5>Description</h5>
+                <p>{{ library.description }}</p>
+                
+                {% if library.readme %}
+                <div class="mt-4">
+                    <h5>README</h5>
+                    <div class="readme-content border rounded p-3 bg-light">
+                        {{ library.readme|safe }}
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        
+        <div class="card mb-4">
+            <div class="card-header bg-success text-white">
+                <h5 class="card-title mb-0"><i class="fas fa-code-branch me-2"></i>Version History</h5>
+            </div>
+            <div class="card-body">
+                {% if versions %}
+                <div class="version-timeline">
+                    {% for version in versions %}
+                    <div class="version-item">
+                        <h5>v{{ version.version_number }}</h5>
+                        <p class="text-muted">Released on {{ version.release_date.strftime('%Y-%m-%d') }}</p>
+                        {% if version.release_notes %}
+                        <div class="release-notes">
+                            <p>{{ version.release_notes }}</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <p class="text-muted">No version history available.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card mb-4">
+            <div class="card-header bg-info text-white">
+                <h5 class="card-title mb-0"><i class="fas fa-chart-line me-2"></i>Statistics</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="downloadsChart" width="100%" height="200"></canvas>
+                <hr>
+                <canvas id="starsChart" width="100%" height="200"></canvas>
+            </div>
+        </div>
+        
+        <div class="card mb-4">
+            <div class="card-header bg-warning text-dark">
+                <h5 class="card-title mb-0"><i class="fas fa-lightbulb me-2"></i>Similar Libraries</h5>
+            </div>
+            <div class="card-body">
+                {% if similar_libraries %}
+                <div class="list-group">
+                    {% for similar in similar_libraries %}
+                    <a href="{{ url_for('main.library_detail', library_id=similar.id) }}" class="list-group-item list-group-item-action">
+                        <div class="d-flex w-100 justify-content-between">
+                            <h6 class="mb-1">{{ similar.name }}</h6>
+                            <small>{{ similar.language }}</small>
+                        </div>
+                        <small class="text-muted">{{ similar.description|truncate(80) }}</small>
+                    </a>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <p class="text-muted">No similar libraries found.</p>
+                {% endif %}
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-header bg-secondary text-white">
+                <h5 class="card-title mb-0"><i class="fas fa-link me-2"></i>Related Links</h5>
+            </div>
+            <div class="card-body">
+                <ul class="list-group list-group-flush">
+                    {% if library.repository_url %}
+                    <li class="list-group-item">
+                        <i class="fab fa-github me-2"></i>
+                        <a href="{{ library.repository_url }}" target="_blank">GitHub Repository</a>
+                    </li>
+                    {% endif %}
+                    
+                    {% if library.documentation_url %}
+                    <li class="list-group-item">
+                        <i class="fas fa-book me-2"></i>
+                        <a href="{{ library.documentation_url }}" target="_blank">Documentation</a>
+                    </li>
+                    {% endif %}
+                    
+                    {% if library.package_url %}
+                    <li class="list-group-item">
+                        <i class="fas fa-box me-2"></i>
+                        <a href="{{ library.package_url }}" target="_blank">Package Repository</a>
+                    </li>
+                    {% endif %}
+                    
+                    {% if library.homepage_url %}
+                    <li class="list-group-item">
+                        <i class="fas fa-home me-2"></i>
+                        <a href="{{ library.homepage_url }}" target="_blank">Homepage</a>
+                    </li>
+                    {% endif %}
+                    
+                    {% if library.issues_url %}
+                    <li class="list-group-item">
+                        <i class="fas fa-exclamation-circle me-2"></i>
+                        <a href="{{ library.issues_url }}" target="_blank">Issue Tracker</a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Downloads chart
+        var downloadsCtx = document.getElementById('downloadsChart').getContext('2d');
+        
+        // Placeholder data - in production, this would come from the backend
+        var downloadsData = {
+            labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+            datasets: [{
+                label: 'Monthly Downloads',
+                data: [12000, 19000, 15000, 25000, 22000, 30000],
+                backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                borderColor: 'rgba(54, 162, 235, 1)',
+                borderWidth: 1,
+                tension: 0.4
+            }]
+        };
+        
+        new Chart(downloadsCtx, {
+            type: 'line',
+            data: downloadsData,
+            options: {
+                responsive: true,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Monthly Downloads'
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+        
+        // Stars chart
+        var starsCtx = document.getElementById('starsChart').getContext('2d');
+        
+        // Placeholder data - in production, this would come from the backend
+        var starsData = {
+            labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+            datasets: [{
+                label: 'GitHub Stars',
+                data: [500, 800, 1200, 1800, 2500, 3200],
+                backgroundColor: 'rgba(255, 206, 86, 0.2)',
+                borderColor: 'rgba(255, 206, 86, 1)',
+                borderWidth: 1,
+                tension: 0.4
+            }]
+        };
+        
+        new Chart(starsCtx, {
+            type: 'line',
+            data: starsData,
+            options: {
+                responsive: true,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'GitHub Stars'
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    });
+</script>
+{% endblock %} 

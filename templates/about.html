@@ -1,0 +1,170 @@
+{% extends 'base.html' %}
+
+{% block title %}About - GenAIPulse{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <h1 class="mb-3">About GenAIPulse</h1>
+        <p class="lead">A real-time monitoring and visualization platform for GenAI-related libraries and packages across multiple programming languages.</p>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card mb-4">
+            <div class="card-header bg-primary text-white">
+                <h5 class="card-title mb-0"><i class="fas fa-info-circle me-2"></i>Project Overview</h5>
+            </div>
+            <div class="card-body">
+                <p>GenAIPulse is designed to help developers stay updated with the latest trends, releases, and updates in the GenAI ecosystem. It monitors and aggregates information about AI libraries across Python, JavaScript, .NET, and Java, providing a comprehensive view of the rapidly evolving AI landscape.</p>
+                
+                <h5 class="mt-4">Key Features</h5>
+                <ul>
+                    <li><strong>Comprehensive Monitoring:</strong> Tracks AI-related packages across multiple programming languages</li>
+                    <li><strong>Intelligent Categorization:</strong> Classifies libraries by language, functionality, and application scenario</li>
+                    <li><strong>Trend Analysis:</strong> Visualizes popularity trends and growth patterns</li>
+                    <li><strong>New Releases Alert:</strong> Highlights the latest packages and updates</li>
+                    <li><strong>User Customization:</strong> Allows subscribing to specific categories for personalized updates</li>
+                </ul>
+                
+                <h5 class="mt-4">Data Sources</h5>
+                <p>GenAIPulse collects data from multiple sources to provide comprehensive information:</p>
+                <ul>
+                    <li><strong>Python:</strong> PyPI (Python Package Index)</li>
+                    <li><strong>JavaScript:</strong> npm Registry</li>
+                    <li><strong>.NET:</strong> NuGet Gallery</li>
+                    <li><strong>Java:</strong> Maven Central Repository</li>
+                    <li><strong>Additional Data:</strong> GitHub API for stars, forks, and activity metrics</li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="card mb-4">
+            <div class="card-header bg-success text-white">
+                <h5 class="card-title mb-0"><i class="fas fa-code me-2"></i>Technology Stack</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h5>Backend</h5>
+                        <ul>
+                            <li>Python 3.9+</li>
+                            <li>Flask Web Framework</li>
+                            <li>SQLAlchemy ORM</li>
+                            <li>APScheduler for task scheduling</li>
+                            <li>Requests for API interactions</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <h5>Frontend</h5>
+                        <ul>
+                            <li>HTML5 / CSS3</li>
+                            <li>Bootstrap 5</li>
+                            <li>JavaScript</li>
+                            <li>Chart.js for data visualization</li>
+                            <li>Font Awesome icons</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <h5 class="mt-3">Database</h5>
+                <p>The application uses SQLite for development and can be configured to use PostgreSQL or MySQL for production environments.</p>
+                
+                <h5 class="mt-3">APIs</h5>
+                <p>GenAIPulse provides a RESTful API for accessing library data programmatically, enabling integration with other tools and services.</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card mb-4">
+            <div class="card-header bg-info text-white">
+                <h5 class="card-title mb-0"><i class="fas fa-chart-line me-2"></i>Statistics</h5>
+            </div>
+            <div class="card-body">
+                <p><strong>Total Libraries:</strong> {{ total_libraries }}</p>
+                <p><strong>Languages Covered:</strong> 4</p>
+                <p><strong>Categories:</strong> {{ categories|length }}</p>
+                <p><strong>Last Database Update:</strong> {{ last_updated.strftime('%Y-%m-%d %H:%M') if last_updated else 'N/A' }}</p>
+                <p><strong>Data Collection Frequency:</strong> Daily</p>
+                
+                <hr>
+                
+                <h6>Language Distribution</h6>
+                <canvas id="languageDistChart" width="100%" height="200"></canvas>
+            </div>
+        </div>
+        
+        <div class="card mb-4">
+            <div class="card-header bg-warning text-dark">
+                <h5 class="card-title mb-0"><i class="fas fa-lightbulb me-2"></i>Future Plans</h5>
+            </div>
+            <div class="card-body">
+                <ul>
+                    <li>User accounts and personalized dashboards</li>
+                    <li>Email notifications for library updates</li>
+                    <li>Integration with more data sources</li>
+                    <li>Advanced trend analysis and predictions</li>
+                    <li>Community features and user reviews</li>
+                    <li>Mobile application</li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-header bg-secondary text-white">
+                <h5 class="card-title mb-0"><i class="fas fa-envelope me-2"></i>Contact</h5>
+            </div>
+            <div class="card-body">
+                <p>Have questions, suggestions, or feedback? We'd love to hear from you!</p>
+                <a href="mailto:contact@genaipulse.com" class="btn btn-primary w-100">
+                    <i class="fas fa-envelope me-2"></i>Contact Us
+                </a>
+                
+                <div class="mt-3">
+                    <p class="mb-1"><strong>GitHub:</strong> <a href="https://github.com/genaipulse/genaipulse" target="_blank">github.com/genaipulse</a></p>
+                    <p class="mb-1"><strong>Twitter:</strong> <a href="https://twitter.com/genaipulse" target="_blank">@genaipulse</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Language distribution chart
+        var languageCtx = document.getElementById('languageDistChart').getContext('2d');
+        
+        // Hard-coded data for demonstration
+        var languageData = {
+            labels: ['Python', 'JavaScript', '.NET', 'Java'],
+            datasets: [{
+                data: [45, 30, 15, 10], // Default values
+                backgroundColor: [
+                    'rgba(54, 162, 235, 0.6)',
+                    'rgba(255, 206, 86, 0.6)',
+                    'rgba(153, 102, 255, 0.6)',
+                    'rgba(75, 192, 192, 0.6)'
+                ],
+                borderWidth: 1
+            }]
+        };
+        
+        new Chart(languageCtx, {
+            type: 'doughnut',
+            data: languageData,
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    }
+                }
+            }
+        });
+    });
+</script>
+{% endblock %} 

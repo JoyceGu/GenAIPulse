@@ -1,0 +1,202 @@
+/* Custom styles for GenAIPulse */
+
+/* General styles */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: #333;
+    background-color: #f8f9fa;
+}
+
+/* Card animations */
+.card {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+}
+
+/* Category cards */
+.card-body i {
+    transition: transform 0.3s ease;
+}
+
+.card:hover .card-body i {
+    transform: scale(1.2);
+}
+
+/* Library list items */
+.list-group-item {
+    transition: background-color 0.2s ease;
+}
+
+.list-group-item:hover {
+    background-color: #f8f9fc;
+}
+
+/* Badge styles */
+.badge {
+    font-weight: 500;
+    padding: 5px 10px;
+}
+
+/* Navbar customization */
+.navbar-brand {
+    font-weight: bold;
+    letter-spacing: 1px;
+}
+
+/* Footer customization */
+footer {
+    margin-top: 2rem;
+}
+
+footer a {
+    transition: color 0.2s ease;
+}
+
+footer a:hover {
+    text-decoration: none;
+    color: #7cc !important;
+}
+
+/* Library detail page */
+.library-header {
+    padding: 2rem 0;
+    background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+    color: white;
+    margin-bottom: 2rem;
+}
+
+.library-header h1 {
+    font-weight: 700;
+}
+
+/* Customization for language badges */
+.badge-python {
+    background-color: #3776ab;
+}
+
+.badge-javascript {
+    background-color: #f7df1e;
+    color: #000;
+}
+
+.badge-dotnet {
+    background-color: #512bd4;
+}
+
+.badge-java {
+    background-color: #007396;
+}
+
+/* Version timeline */
+.version-timeline {
+    position: relative;
+    padding-left: 30px;
+}
+
+.version-timeline::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background-color: #e9ecef;
+}
+
+.version-item {
+    position: relative;
+    margin-bottom: 2rem;
+}
+
+.version-item::before {
+    content: '';
+    position: absolute;
+    left: -34px;
+    top: 5px;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background-color: #007bff;
+}
+
+.version-item:last-child {
+    margin-bottom: 0;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .jumbotron h1 {
+        font-size: 2rem;
+    }
+    
+    .version-timeline {
+        padding-left: 20px;
+    }
+    
+    .version-item::before {
+        left: -24px;
+    }
+}
+
+/* Search box customization */
+.search-box {
+    position: relative;
+}
+
+.search-box .form-control {
+    padding-left: 40px;
+    border-radius: 20px;
+}
+
+.search-box i {
+    position: absolute;
+    left: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #6c757d;
+}
+
+/* Filter panel */
+.filter-panel {
+    background-color: #f8f8f8;
+    border-radius: 10px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+/* Loading spinner */
+.spinner-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(255, 255, 255, 0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+}
+
+.spinner-border {
+    width: 3rem;
+    height: 3rem;
+}
+
+/* Toast notifications */
+.toast-container {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 1050;
+}
+
+/* Custom tooltips */
+.custom-tooltip {
+    --bs-tooltip-bg: rgba(0, 0, 0, 0.9);
+    --bs-tooltip-max-width: 200px;
+} 
